@@ -10,7 +10,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import { SignupProvider } from "@/components/SignUpProvider";
 let c;
-//few
+
 if (typeof window !== "undefined") {
   const ContextProvider = dynamic(() => import("@/components/ContextProvider"), {
     ssr: false,
