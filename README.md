@@ -1,11 +1,6 @@
-# Welcome to the LaunchDarkly 2025 ToggleBank Template Demo App
+# Welcome to the ToggleBank Demo App
 
-This demo focuses on covering the 4 core use cases across in the financial industry in a fictional company Togglebank... 
-
-- Monitor & Remediate Releases
-- Accelerate AI
-- Optimize Experiences
-- Increase Release Velocity
+This is an app built to showcase how feature flags work in a banking application.
 
 ## Setup Info
 Information to come later...
