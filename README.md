@@ -9,4 +9,4 @@ Install
 npm install
 
 npm run dev to run local dev
-<!-- Please follow instructions provided in this [confluence document](https://launchdarkly.atlassian.net/wiki/spaces/REV/pages/2773942302/Demo+Instances+2024+-+Technical): -->
+
