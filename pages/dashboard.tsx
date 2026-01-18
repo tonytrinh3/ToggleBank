@@ -1,26 +1,8 @@
-import { useContext, useEffect } from "react";
-import LoginContext from "@/utils/contexts/login";
 import BankUserDashboard from "@/components/ui/bankcomponents/bankUserDashboard";
 import Chatbot from "@/components/chatbot/ChatBot";
-import { useRouter } from "next/router";
-import { AuthLoading } from "@/components/ui/auth-loading";
+import { withAuthGuard } from "@/components/ui/with-auth-guard";
 
-export default function Dashboard() {
-    const { isLoggedIn } = useContext(LoginContext);
-    const router = useRouter();
-
-    useEffect(() => {
-        // Redirect to home if not logged in
-        if (!isLoggedIn) {
-            router.push("/bank");
-        }
-    }, [isLoggedIn, router]);
-
-    // Show loading state while redirecting if user is not logged in
-    if (!isLoggedIn) {
-        return <AuthLoading message="Logging out..." />;
-    }
-
+function Dashboard() {
     return (
         <main className={` w-full min-h-screen  bg-cover bg-center bg-no-repeat pb-10`}>
             <BankUserDashboard />
@@ -28,3 +10,9 @@ export default function Dashboard() {
         </main>
     );
 }
+
+// Wrap Dashboard with auth guard HOC
+// This handles:
+// - Showing ForbiddenPage if user lands on /dashboard without authentication
+// - Showing loading message and redirecting if user logs out while on dashboard
+export default withAuthGuard(Dashboard);
