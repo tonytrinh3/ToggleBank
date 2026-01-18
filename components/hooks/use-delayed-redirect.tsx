@@ -28,7 +28,7 @@ import { useRouter } from "next/router";
 export function useDelayedRedirect(
     shouldRedirect: boolean,
     redirectPath: string = "/bank",
-    delayMs: number = 2000
+    delayMs: number = 1500
 ) {
     const router = useRouter();
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);

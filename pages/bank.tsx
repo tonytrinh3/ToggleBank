@@ -8,7 +8,8 @@ import { useDelayedRedirect } from "@/components/hooks/use-delayed-redirect";
 export default function Bank() {
     const { isLoggedIn } = useContext(LoginContext);
 
-    // Redirect to dashboard if logged in (immediate redirect, no delay)
+    // Redirect to dashboard if logged in
+    // Uses default 2000ms delay to show AuthLoading before redirecting
     useDelayedRedirect(isLoggedIn, "/dashboard");
 
     // Prevent flash of home page content if user is logged in

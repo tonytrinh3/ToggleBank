@@ -16,12 +16,10 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { COMPANY_LOGOS, STARTER_PERSONAS } from "@/utils/constants";
-import { useRouter } from "next/router";
 
 const NavBarLoginInterface = ({ children }: { children?: React.ReactNode }) => {
 	const { isLoggedIn, userObject, logoutUser, loginUser } =
 		useContext(LoginContext);
-	const router = useRouter();
 
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [defaultEmail, setDefaultEmail] = useState<string>(
@@ -32,14 +30,14 @@ const NavBarLoginInterface = ({ children }: { children?: React.ReactNode }) => {
 		if (!defaultEmail) return;
 
 		await loginUser(defaultEmail);
-		// Navigate to dashboard after successful login
-		router.push("/dashboard");
+		// NOTE: Don't navigate here - let bank.tsx handle the redirect via useDelayedRedirect
+		// This allows the AuthLoading component to show before redirecting
 	}
 
 	async function handleLogout(): Promise<void> {
 		await logoutUser();
-		// Navigate back to home page after logout
-		router.push("/bank");
+		// NOTE: Don't navigate here - let with-auth-guard handle the redirect via useDelayedRedirect
+		// This allows the "Logging out..." loading state to show before redirecting
 	}
 
 	return (

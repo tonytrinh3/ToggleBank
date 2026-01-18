@@ -10,16 +10,14 @@ import { useContext } from "react";
 import LoginContext from "@/utils/contexts/login";
 import { capitalizeFirstLetter } from "@/utils/utils";
 import type { Persona } from "@/utils/typescriptTypesInterfaceLogin";
-import { useRouter } from "next/router";
 
 export function QuickLoginDialog() {
     const { loginUser, isLoggedIn, userObject, allUsers } = useContext(LoginContext);
-    const router = useRouter();
     
     const personaClicked = async (persona: Persona): Promise<void> => {
         await loginUser(persona.personaemail);
-        // Navigate to dashboard after successful login
-        router.push("/dashboard");
+        // NOTE: Don't navigate here - let bank.tsx handle the redirect via useDelayedRedirect
+        // This allows the AuthLoading component to show before redirecting
     };
 
     return (
