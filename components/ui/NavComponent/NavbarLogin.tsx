@@ -16,20 +16,30 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { COMPANY_LOGOS, STARTER_PERSONAS } from "@/utils/constants";
+import { useRouter } from "next/router";
 
 const NavBarLoginInterface = ({ children }: { children?: React.ReactNode }) => {
 	const { isLoggedIn, userObject, logoutUser, loginUser } =
 		useContext(LoginContext);
+	const router = useRouter();
 
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [defaultEmail, setDefaultEmail] = useState<string>(
 		STARTER_PERSONAS[0].personaemail
 	);
 
-	function handleLogin(): void {
+	async function handleLogin(): Promise<void> {
 		if (!defaultEmail) return;
 
-		loginUser(defaultEmail);
+		await loginUser(defaultEmail);
+		// Navigate to dashboard after successful login
+		router.push("/dashboard");
+	}
+
+	async function handleLogout(): Promise<void> {
+		await logoutUser();
+		// Navigate back to home page after logout
+		router.push("/bank");
 	}
 
 	return (
@@ -81,7 +91,7 @@ const NavBarLoginInterface = ({ children }: { children?: React.ReactNode }) => {
 
 							<Button
 								onClick={() => {
-									isLoggedIn ? logoutUser() : handleLogin();
+									isLoggedIn ? handleLogout() : handleLogin();
 								}}
 								className={` w-full mx-auto font-sohnelight rounded-none  text-lg bg-loginComponentBlue text-white`}
 							>

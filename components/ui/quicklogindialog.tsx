@@ -10,11 +10,16 @@ import { useContext } from "react";
 import LoginContext from "@/utils/contexts/login";
 import { capitalizeFirstLetter } from "@/utils/utils";
 import type { Persona } from "@/utils/typescriptTypesInterfaceLogin";
+import { useRouter } from "next/router";
 
 export function QuickLoginDialog() {
     const { loginUser, isLoggedIn, userObject, allUsers } = useContext(LoginContext);
-    const personaClicked = (persona: Persona): void => {
-        loginUser(persona.personaemail);
+    const router = useRouter();
+    
+    const personaClicked = async (persona: Persona): Promise<void> => {
+        await loginUser(persona.personaemail);
+        // Navigate to dashboard after successful login
+        router.push("/dashboard");
     };
 
     return (
