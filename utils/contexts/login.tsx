@@ -49,8 +49,49 @@ export const LoginProvider = ({ children }: { children: any }) => {
     const [appMultiContext, setAppMultiContext] = useState<LDContextInterface>(starterLDContext);
     const [allUsers, setAllUsers] = useState<Persona[]>(STARTER_PERSONAS);
 
-    const loginUser = async (email: string): Promise<void> => {
+    /**
+     * Helper function to safely call LaunchDarkly identify with error handling.
+     * 
+     * WHY THIS WORKS:
+     * 
+     * The Problem (Before):
+     * - Original code: `await ldClient?.identify(newContext)`
+     * - When LaunchDarkly throws a 401 error, it propagates up and blocks the login flow
+     * - Optional chaining (`?.`) only guards against null/undefined, not thrown errors
+     * 
+     * The Solution:
+     * - Early return: If ldClient doesn't exist, skip the call entirely
+     * - Try-catch: Intercepts any errors (like 401) from ldClient.identify()
+     * - Error swallowing: By catching and NOT rethrowing, the error doesn't propagate
+     * - Function resolves successfully: The caller continues normally even if LaunchDarkly fails
+     * 
+     * Flow Comparison:
+     * Before: loginUser() → await ldClient.identify() → ❌ 401 Error → ❌ Login stops
+     * After:  loginUser() → await safeLDIdentify() → catch error → ✅ Login continues
+     * 
+     * This allows users to login even when LaunchDarkly SDK is unavailable, misconfigured,
+     * or returns authentication errors (401). The app gracefully degrades without blocking.
+     */
+    const safeLDIdentify = async (context: LDContextInterface): Promise<void> => {
+        // Early return if LaunchDarkly client is not initialized
+        if (!ldClient) {
+            console.warn("LaunchDarkly client not available, skipping identify");
+            return;
+        }
 
+        // Wrap LaunchDarkly call in try-catch to prevent errors from blocking the app
+        // If identify() throws (e.g., 401 authentication error), we catch it here
+        // and allow the calling function to continue normally
+        try {
+            await ldClient.identify(context);
+        } catch (error) {
+            // Log error for debugging but don't throw - allow app to continue without LaunchDarkly
+            // By not rethrowing, the promise resolves successfully and the caller continues
+            console.warn("LaunchDarkly identify failed, continuing without it:", error);
+        }
+    };
+
+    const loginUser = async (email: string): Promise<void> => {
         updateAllUsersArray({ userObject, setAllUsers });
 
         const chosenPersona = getChosenPersona({ allUsers: allUsers, chosenEmail: email });
@@ -70,8 +111,12 @@ export const LoginProvider = ({ children }: { children: any }) => {
         });
 
         setAppMultiContext(newContext);
-        await ldClient?.identify(newContext);
+        //await ldClient?.identify(newContext);
         setCookie(LD_CONTEXT_COOKIE_KEY, newContext);
+        
+        // Attempt LaunchDarkly identify, but don't block login if it fails
+        await safeLDIdentify(newContext);
+        
         setIsLoggedIn(true);
     };
 
@@ -92,7 +137,9 @@ export const LoginProvider = ({ children }: { children: any }) => {
 
         setAppMultiContext(newContext);
         setCookie(LD_CONTEXT_COOKIE_KEY, newContext);
-        await ldClient?.identify(newContext);
+        
+        // Attempt LaunchDarkly identify, but don't block if it fails
+        await safeLDIdentify(newContext);
     };
 
     const updateRandomizedUserContext = async (): Promise<void> => {
@@ -108,7 +155,9 @@ export const LoginProvider = ({ children }: { children: any }) => {
             newDevice: getRandomizedDeviceForContext(),
             newLocation: getRandomizedLocation(),
         });
-        await ldClient?.identify(newContext);
+        
+        // Attempt LaunchDarkly identify, but don't block if it fails
+        await safeLDIdentify(newContext);
     };
 
     const logoutUser = async () => {
@@ -120,8 +169,11 @@ export const LoginProvider = ({ children }: { children: any }) => {
             isAnonymous: true,
         });
         setAppMultiContext(newContext);
-        await ldClient?.identify(newContext);
+        //await ldClient?.identify(newContext);
         setCookie(LD_CONTEXT_COOKIE_KEY, newContext);
+        
+        // Attempt LaunchDarkly identify, but don't block logout if it fails
+        await safeLDIdentify(newContext);
     };
 
     return (
