@@ -2,7 +2,7 @@ import { useState, ReactElement } from "react";
 import { CheckingAccount } from "@/components/ui/bankcomponents/checkingview";
 import { CreditAccount } from "@/components/ui/bankcomponents/creditview";
 import { MorgtgageAccount } from "@/components/ui/bankcomponents/mortgageview";
-import { useFlags } from "launchdarkly-react-client-sdk";
+import { useFlags } from "@/utils/contexts/FeatureFlagContext";
 import { oldCheckingData } from "@/lib/oldCheckingData";
 import WealthManagementSheet from "@/components/ui/bankcomponents/wealthManagement";
 import { WealthManagementGraph } from "@/components/ui/bankcomponents/WealthManagementGraph";

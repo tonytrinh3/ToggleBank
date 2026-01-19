@@ -1,201 +1,174 @@
 import { Sidebar, SidebarContent } from "@/components/ui/sidebar";
-import { PulseLoader } from "react-spinners";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Flag, RotateCcw, Settings2 } from "lucide-react";
+import { useFeatureFlagContext } from "@/utils/contexts/FeatureFlagContext";
+import { FLAG_METADATA, FeatureFlags } from "@/utils/featureFlags";
 
-import { Clock, Eye, EyeOff, File } from "lucide-react";
-
-import { useContext, useState } from "react";
-import LiveLogsContext from "@/utils/contexts/LiveLogsContext";
-import { Highlight, themes } from "prism-react-renderer";
-import { cn } from "@/utils/utils";
-import { Button } from "./button";
-
+/**
+ * Feature Flag Sidebar
+ * 
+ * This sidebar provides a UI to toggle feature flags locally.
+ * It mimics LaunchDarkly's feature flag toggles for development and testing.
+ */
 export function AppSidebar() {
-	const { currentLDFlagEnvValues, liveLogs, clearLiveLogs } =
-		useContext(LiveLogsContext);
-	const [toggleCodeBoxObj, setToggleCodeBoxObj] = useState<
-		Record<number, boolean>
-	>({});
+	const { flags, toggleFlag, resetFlags, setFlag } = useFeatureFlagContext();
+
+	// Group flags by category
+	const flagsByCategory: Record<string, Array<keyof FeatureFlags>> = {};
+	(Object.keys(FLAG_METADATA) as Array<keyof FeatureFlags>).forEach((key) => {
+		const category = FLAG_METADATA[key].category;
+		if (!flagsByCategory[category]) {
+			flagsByCategory[category] = [];
+		}
+		flagsByCategory[category].push(key);
+	});
+
+	// Define category order (Features first, then others)
+	const categoryOrder = ["Features", "Release", "AI Features", "Guarded Release", "Migration"];
+	const sortedCategories = Object.keys(flagsByCategory).sort((a, b) => {
+		const aIndex = categoryOrder.indexOf(a);
+		const bIndex = categoryOrder.indexOf(b);
+		// If not in order list, put at end
+		if (aIndex === -1) return 1;
+		if (bIndex === -1) return -1;
+		return aIndex - bIndex;
+	});
+
+	// Get the current value for display
+	const getFlagDisplayValue = (key: keyof FeatureFlags): boolean => {
+		const value = flags[key];
+		if (typeof value === "boolean") {
+			return value;
+		}
+		if (typeof value === "object" && value !== null && "enabled" in value) {
+			return value.enabled;
+		}
+		return false;
+	};
+
+	// Get AI model options
+	const aiModels = [
+		{ value: "anthropic.claude-3-haiku-20240307-v1:0", label: "Claude 3 Haiku" },
+		{ value: "anthropic.claude-3-sonnet-20240229-v1:0", label: "Claude 3 Sonnet" },
+		{ value: "anthropic.claude-3-opus-20240229-v1:0", label: "Claude 3 Opus" },
+		{ value: "amazon.titan-text-express-v1", label: "Amazon Titan" },
+	];
 
 	return (
 		<Sidebar side={"right"} variant={"sidebar"} collapsible={"offcanvas"}>
-			{/* <SidebarHeader /> */}
-			<SidebarContent
-				className="bg-white flex flex-col p-4"
-				id="sidebar-content"
-			>
-				<Tabs defaultValue="env_values" className="">
-					<TabsList className="w-full grid  grid-cols-1 lg:grid-cols-1 mb-4 h-[5rem]">
-						<TabsTrigger value="env_values" className="text-wrap truncate">
-							Current Values in your Environment
-						</TabsTrigger>
-						<TabsTrigger value="live_logs" className="">
-							Live Logs
-						</TabsTrigger>
-					</TabsList>
-					<TabsContent value="env_values">
-						<div className="mb-4 text-center border-[1px] border-slate-500 rounded-lg p-2 flex items-center justify-center gap-x-2">
-							<span className="relative flex h-3 w-3">
-								<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-								<span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-							</span>
-							<h2>Connected to LaunchDarkly</h2>
+			<SidebarContent className="bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col p-4 text-white">
+				{/* Header */}
+				<div className="mb-6">
+					<div className="flex items-center gap-3 mb-2">
+						<div className="bg-gradient-to-br from-violet-500 to-purple-600 p-2 rounded-lg">
+							<Flag className="h-5 w-5 text-white" />
 						</div>
-						<div className="border-[1px] border-slate-500 rounded-lg p-2">
-							<Table className="">
-								{/* <TableCaption>A list of your recent invoices.</TableCaption> */}
-								<TableHeader>
-									<TableRow>
-										<TableHead>Status</TableHead>
-										<TableHead>Method</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									<>
-										{currentLDFlagEnvValues.map((value: any, index: number) => {
-											return (
-												<TableRow key={index}>
-													<TableCell>{value[0]}</TableCell>
-													<TableCell>{JSON.stringify(value[1])}</TableCell>
-												</TableRow>
-											);
-										})}
-									</>
-								</TableBody>
-							</Table>
-						</div>
-					</TabsContent>
-					<TabsContent value="live_logs">
-						<div className="flex flex-col h-full">
-							<div className="flex justify-between">
-								<div className="flex  bg-gray-200 w-max rounded-md items-center gap-x-2 py-1 px-2 mb-4">
-									<h2 className="text-xs">Monitoring Events </h2>
-									<PulseLoader
-										className=""
-										size={6}
-										speedMultiplier={0.5}
-										color={"gray"}
-									/>
-								</div>
-								<Button
-									onClick={clearLiveLogs}
-									className="!py-1 h-full text-xs"
-								>
-									Clear Logs
-								</Button>
-							</div>
-							<div className={`flex flex-col justify-center`}>
-								{liveLogs.length === 0 && (
-									<div className="flex flex-col items-center justify-center h-[20rem] sm:h-[40rem]">
-										<div className="bg-gray-500 rounded-full flex items-center justify-center h-24 w-24 mb-2">
-											<File className="  text-white h-20 w-20 p-4" />
-										</div>
+						<h1 className="text-xl font-bold bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">
+							Feature Flags
+						</h1>
+					</div>
+					<p className="text-slate-400 text-sm">
+						Toggle features locally for development and testing
+					</p>
+				</div>
 
-										<p>It is empty here...</p>
-									</div>
-								)}
-								{liveLogs.toReversed().map((log: any, index: number) => {
+				{/* Reset Button */}
+				<Button
+					onClick={resetFlags}
+					variant="outline"
+					className="mb-6 border-slate-600 bg-slate-800/50 text-slate-300 hover:bg-slate-700 hover:text-white"
+				>
+					<RotateCcw className="h-4 w-4 mr-2" />
+					Reset All to Defaults
+				</Button>
+
+				{/* Flag Categories */}
+				<div className="flex flex-col gap-4 overflow-y-auto">
+					{sortedCategories.map((category) => (
+						<Card key={category} className="bg-slate-800/50 border-slate-700">
+							<CardHeader className="pb-3">
+								<CardTitle className="text-sm font-medium text-slate-300 flex items-center gap-2">
+									<Settings2 className="h-4 w-4 text-violet-400" />
+									{category}
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="flex flex-col gap-4">
+								{flagsByCategory[category].map((key) => {
+									const meta = FLAG_METADATA[key];
+									const isEnabled = getFlagDisplayValue(key);
+									const isAIConfig = key === "ai-config--togglebot";
+
 									return (
-										<Card className="mb-2" key={index}>
-											<CardContent className="p-4 w-full overflow-x-auto">
-												<div
-													className={cn(
-														`rounded-md py-1 px-2 w-max mb-10 text-xs mt-4`,
-														log.color
-													)}
-												>
-													{log.type}
+										<div
+											key={key}
+											className="flex flex-col gap-2 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50"
+										>
+											<div className="flex items-center justify-between">
+												<div className="flex-1 min-w-0 mr-3">
+													<p className="font-medium text-sm text-white truncate">
+														{meta.name}
+													</p>
+													<p className="text-xs text-slate-400 mt-0.5">
+														{meta.description}
+													</p>
 												</div>
-												<div className="flex justify-between items-center mb-4  text-xs text-gray-500">
-													<div
-														onClick={() => {
-															setToggleCodeBoxObj((prevState) => {
-																return {
-																	...prevState,
-																	[index]: !toggleCodeBoxObj[index],
-																};
+												<Switch
+													checked={isEnabled}
+													onCheckedChange={() => toggleFlag(key)}
+													className="data-[state=checked]:bg-violet-500"
+												/>
+											</div>
+
+											{/* AI Model Selector (only for ai-config flag) */}
+											{isAIConfig && isEnabled && (
+												<div className="mt-2 pt-2 border-t border-slate-700">
+													<label className="text-xs text-slate-400 mb-1 block">
+														AI Model
+													</label>
+													<select
+														value={
+															(flags["ai-config--togglebot"] as { enabled: boolean; model: string })
+																.model
+														}
+														onChange={(e) => {
+															setFlag("ai-config--togglebot", {
+																enabled: true,
+																model: e.target.value,
 															});
 														}}
+														className="w-full bg-slate-800 border border-slate-600 rounded-md px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
 													>
-														{toggleCodeBoxObj[index] ? (
-															<p className="flex gap-x-2 items-center cursor-pointer">
-																<span>
-																	{" "}
-																	<EyeOff className="h-5 w-5 " />
-																</span>{" "}
-																Collapse
-															</p>
-														) : (
-															<p className="flex gap-x-2 items-center cursor-pointer">
-																<span>
-																	<Eye className="h-5 w-5" />
-																</span>{" "}
-																Details
-															</p>
-														)}
-													</div>
-
-													<div className="flex items-center gap-2">
-														<span>
-															<Clock className="h-5 w-5" />
-														</span>
-														{`${
-															log.date.getMonth() + 1
-														}/${log.date.getDate()}/${log.date.getFullYear()} ${log.date.getHours()}:${log.date.getMinutes()}:${log.date.getSeconds()}`}
-													</div>
+														{aiModels.map((model) => (
+															<option key={model.value} value={model.value}>
+																{model.label}
+															</option>
+														))}
+													</select>
 												</div>
-												{toggleCodeBoxObj[index] ? (
-													<div className="w-full ">
-														<Highlight
-															theme={themes.shadesOfPurple}
-															code={log.log}
-															language="tsx"
-														>
-															{({
-																className,
-																style,
-																tokens,
-																getLineProps,
-																getTokenProps,
-															}) => (
-																<pre
-																	style={style}
-																	className="w-full overflow-x-auto p-4 text-wrap rounded-lg  shadow-lg "
-																>
-																	{tokens.map((line, i) => (
-																		<div key={i} {...getLineProps({ line })}>
-																			<span className="mr-2">{i + 1}</span>
-																			{line.map((token, key) => (
-																				<span
-																					key={key}
-																					{...getTokenProps({ token })}
-																					className={className}
-																				/>
-																			))}
-																		</div>
-																	))}
-																</pre>
-															)}
-														</Highlight>
-													</div>
-												) : null}
-											</CardContent>
-										</Card>
+											)}
+
+											{/* Flag key badge */}
+											<div className="mt-1">
+												<code className="text-[10px] bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-mono">
+													{key}
+												</code>
+											</div>
+										</div>
 									);
 								})}
-							</div>
-						</div>
-					</TabsContent>
-				</Tabs>
+							</CardContent>
+						</Card>
+					))}
+				</div>
+
+				{/* Footer */}
+				<div className="mt-auto pt-4 border-t border-slate-700">
+					<p className="text-xs text-slate-500 text-center">
+						Flags are stored in localStorage
+					</p>
+				</div>
 			</SidebarContent>
 		</Sidebar>
 	);
