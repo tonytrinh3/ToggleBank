@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import LoginContext from "@/utils/contexts/login";
 import { v4 as uuidv4 } from "uuid";
-import { useLDClient, useFlags } from "launchdarkly-react-client-sdk";
+import { useFlags } from "@/utils/contexts/FeatureFlagContext";
 import { PulseLoader } from "react-spinners";
 import { useToast } from "@/components/ui/use-toast";
 import { BatteryCharging } from "lucide-react";
@@ -46,9 +46,8 @@ function ChatBotInterface({
 	isOpen: boolean;
 	toggleSidebar: (boolean?: boolean) => void;
 }) {
-	const ldClient = useLDClient();
-	const aiNewModelChatbotFlag: AIModelInterface =
-		useFlags()[AI_CONFIG_TOGGLEBOT_LDFLAG_KEY] ?? DEFAULT_AI_MODEL;
+	const flags = useFlags();
+	const aiConfigFlag = flags[AI_CONFIG_TOGGLEBOT_LDFLAG_KEY];
 	const aiConfigKey = AI_CONFIG_TOGGLEBOT_LDFLAG_KEY;
 	const { open } = useSidebar();
 
@@ -144,11 +143,8 @@ function ChatBotInterface({
 	};
 
 	const surveyResponseNotification = (surveyResponse: string) => {
-		ldClient?.track(surveyResponse, ldClient.getContext());
-
 		sendChatbotFeedback(surveyResponse);
 		logLDMetricSent({ metricKey: surveyResponse });
-		ldClient?.flush();
 		toast({
 			title: `Thank you for your response!`,
 			wrapperStyle: "bg-green-600 text-white font-sohne text-base border-none",
@@ -189,7 +185,7 @@ function ChatBotInterface({
 	};
 
 	const aiModelName = () => {
-		return aiNewModelChatbotFlag?.model?.name?.includes(COHERE)
+		return aiConfigFlag?.model?.includes("cohere")
 			? COHERE_CORAL
 			: ANTHROPIC_CLAUDE;
 	};
@@ -221,18 +217,18 @@ function ChatBotInterface({
 									<p className="text-sm font-medium leading-none">
 										Chatbot Assistant
 									</p>
-									{aiNewModelChatbotFlag?.model?.name && (
+									{aiConfigFlag?.model && (
 										<>
 											<p className={"text-sm text-gray-500 dark:text-gray-400"}>
 												Powered by{" "}
 												<span
 													className={`font-bold text-white ${
-														aiNewModelChatbotFlag?.model?.name?.includes(COHERE)
+														aiConfigFlag?.model?.includes("cohere")
 															? "!text-cohereColor"
 															: ""
 													} 
                       ${
-												aiNewModelChatbotFlag?.model?.name?.includes(ANTHROPIC)
+												aiConfigFlag?.model?.includes("anthropic")
 													? "!text-anthropicColor"
 													: ""
 											}
@@ -299,7 +295,7 @@ function ChatBotInterface({
 									: {}
 							}
 						>
-							{aiNewModelChatbotFlag?._ldMeta?.enabled && (
+							{aiConfigFlag?.enabled && (
 								<div className="space-y-4">
 									<div className="flex w-max max-w-[75%] flex-col gap-2 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800">
 										Hello! How can I assist you today?
@@ -348,7 +344,7 @@ function ChatBotInterface({
 								className="flex w-full items-center space-x-2"
 								onSubmit={(e) => e.preventDefault()}
 							>
-								{aiNewModelChatbotFlag?._ldMeta?.enabled === false ? (
+								{!aiConfigFlag?.enabled ? (
 									<p className="text-airlinegray">
 										We are offline for today. Please return next time!
 									</p>
@@ -383,10 +379,8 @@ function ChatBotInterface({
 }
 
 export default function Chatbot() {
-	const aiNewModelChatbotFlag: AIModelInterface =
-		useFlags()[AI_CONFIG_TOGGLEBOT_LDFLAG_KEY] == undefined
-			? DEFAULT_AI_MODEL
-			: useFlags()[AI_CONFIG_TOGGLEBOT_LDFLAG_KEY];
+	const flags = useFlags();
+	const aiConfigFlag = flags[AI_CONFIG_TOGGLEBOT_LDFLAG_KEY];
 
 	const isMobile = useIsMobile();
 	const [isOpen, setIsOpen] = useState(false);
@@ -442,10 +436,10 @@ export default function Chatbot() {
 					onClick={() => toggleSidebar()}
 				>
 					{isOpen && <XIcon className="h-8 w-8" />}
-					{!isOpen && aiNewModelChatbotFlag?._ldMeta?.enabled !== false && (
+					{!isOpen && aiConfigFlag?.enabled && (
 						<MessageCircleIcon className="h-8 w-8" />
 					)}
-					{!isOpen && aiNewModelChatbotFlag?._ldMeta?.enabled === false && (
+					{!isOpen && !aiConfigFlag?.enabled && (
 						<BatteryCharging className="h-8 w-8" />
 					)}
 					<span className="sr-only">Open Chatbot</span>

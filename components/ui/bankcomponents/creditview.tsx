@@ -7,7 +7,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
-import { useFlags } from "launchdarkly-react-client-sdk";
+import { useFlags } from "@/utils/contexts/FeatureFlagContext";
 
 import { CreditCard } from "lucide-react";
 import {

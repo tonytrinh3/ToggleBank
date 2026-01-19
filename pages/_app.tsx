@@ -9,6 +9,7 @@ import { LiveLogsProvider } from "@/utils/contexts/LiveLogsContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import { SignupProvider } from "@/components/SignUpProvider";
+import { FeatureFlagProvider } from "@/utils/contexts/FeatureFlagContext";
 let c;
 
 if (typeof window !== "undefined") {
@@ -23,11 +24,12 @@ if (typeof window !== "undefined") {
   c = ({ Component, pageProps }: AppProps) => {
     return (
       <NoSSRWrapper>
-        <ContextProvider>
-          <TelemetryProvider>
-            <LoginProvider>
-              <LiveLogsProvider>
-                <SidebarProvider
+        <FeatureFlagProvider>
+          <ContextProvider>
+            <TelemetryProvider>
+              <LoginProvider>
+                <LiveLogsProvider>
+                  <SidebarProvider
                   defaultOpen={false}
                   style={{
                     "--sidebar-width": "30vw",
@@ -53,9 +55,10 @@ if (typeof window !== "undefined") {
                   </SignupProvider>
                 </SidebarProvider>
               </LiveLogsProvider>
-            </LoginProvider>
-          </TelemetryProvider>
-        </ContextProvider>
+              </LoginProvider>
+            </TelemetryProvider>
+          </ContextProvider>
+        </FeatureFlagProvider>
       </NoSSRWrapper>
     );
   };

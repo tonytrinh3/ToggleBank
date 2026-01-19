@@ -17,7 +17,7 @@ import {
     TableRow,
 } from "../table";
 import { useEffect, useState } from "react";
-import { useFlags } from "launchdarkly-react-client-sdk";
+import { useFlags } from "@/utils/contexts/FeatureFlagContext";
 import { CiMoneyCheck1 } from "react-icons/ci";
 import BankDashboardAccountCard from "./BankDashboardAccountCard";
 

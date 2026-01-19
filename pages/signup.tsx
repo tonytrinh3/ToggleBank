@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useFlags, useLDClient } from "launchdarkly-react-client-sdk";
+import { useFlags } from "@/utils/contexts/FeatureFlagContext";
 import { useState, useContext } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,6 @@ import { RELEASE_NEW_SIGNUP_PROMO_LDFLAG_KEY } from "@/utils/flagConstants";
 
 export default function SignUpPage() {
 	const router = useRouter();
-	const ldClient = useLDClient();
 	const { userData, updateUserData } = useSignup();
 	const [email, setEmail] = useState(userData.email);
 	const [password, setPassword] = useState(userData.password);
@@ -41,7 +40,6 @@ export default function SignUpPage() {
 		}
 
 		updateUserData({ email, password });
-		ldClient?.track(INITIAL_SIGN_UP_COMPLETED);
 		logLDMetricSent({ metricKey: INITIAL_SIGN_UP_COMPLETED });
 		router.push("/personal-details");
 	};
