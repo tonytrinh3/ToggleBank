@@ -25,6 +25,17 @@ export function AppSidebar() {
 		flagsByCategory[category].push(key);
 	});
 
+	// Define category order (Features first, then others)
+	const categoryOrder = ["Features", "Release", "AI Features", "Guarded Release", "Migration"];
+	const sortedCategories = Object.keys(flagsByCategory).sort((a, b) => {
+		const aIndex = categoryOrder.indexOf(a);
+		const bIndex = categoryOrder.indexOf(b);
+		// If not in order list, put at end
+		if (aIndex === -1) return 1;
+		if (bIndex === -1) return -1;
+		return aIndex - bIndex;
+	});
+
 	// Get the current value for display
 	const getFlagDisplayValue = (key: keyof FeatureFlags): boolean => {
 		const value = flags[key];
@@ -75,7 +86,7 @@ export function AppSidebar() {
 
 				{/* Flag Categories */}
 				<div className="flex flex-col gap-4 overflow-y-auto">
-					{Object.entries(flagsByCategory).map(([category, flagKeys]) => (
+					{sortedCategories.map((category) => (
 						<Card key={category} className="bg-slate-800/50 border-slate-700">
 							<CardHeader className="pb-3">
 								<CardTitle className="text-sm font-medium text-slate-300 flex items-center gap-2">
@@ -84,7 +95,7 @@ export function AppSidebar() {
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="flex flex-col gap-4">
-								{flagKeys.map((key) => {
+								{flagsByCategory[category].map((key) => {
 									const meta = FLAG_METADATA[key];
 									const isEnabled = getFlagDisplayValue(key);
 									const isAIConfig = key === "ai-config--togglebot";
