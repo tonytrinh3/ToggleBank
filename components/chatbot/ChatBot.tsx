@@ -50,6 +50,8 @@ function ChatBotInterface({
 	const aiConfigFlag = flags[AI_CONFIG_TOGGLEBOT_LDFLAG_KEY];
 	const aiConfigKey = AI_CONFIG_TOGGLEBOT_LDFLAG_KEY;
 	const { open } = useSidebar();
+	// const aiNewModelChatbotFlag: AIModelInterface =
+	// 	useFlags()[AI_CONFIG_TOGGLEBOT_LDFLAG_KEY] ?? DEFAULT_AI_MODEL;
 
 	const [messages, setMessages] = useState<ChatBotMessageInterface[]>([]);
 	const [userInput, setUserInput] = useState("");
@@ -144,6 +146,7 @@ function ChatBotInterface({
 
 	const surveyResponseNotification = (surveyResponse: string) => {
 		sendChatbotFeedback(surveyResponse);
+		//ldClient?.track(surveyResponse, ldClient.getContext());
 		logLDMetricSent({ metricKey: surveyResponse });
 		toast({
 			title: `Thank you for your response!`,

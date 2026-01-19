@@ -87,8 +87,10 @@ export default function BankHomePage() {
 								<Button
 									className="shadow-2xl bg-bank-gradient-blue-background hover:bg-bank-gradient-text-color hover:text-white text-white rounded-3xl font-sohnelight w-28 h-10 sm:w-32 sm:h-11 md:w-36 md:h-12 lg:w-40 lg:h-14 xl:w-36 xl:h-12 text-xs sm:text-md md:text-lg lg:text-xl xl:text-xl"
 									onClick={() => {
+										//ldClient?.track(SIGN_UP_STARTED);
 										logLDMetricSent({ metricKey: SIGN_UP_STARTED });
 										router.push("/signup");
+								
 									}}
 								>
 									Join Now
