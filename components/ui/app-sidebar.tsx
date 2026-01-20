@@ -25,8 +25,8 @@ export function AppSidebar() {
 		flagsByCategory[category].push(key);
 	});
 
-	// Define category order (Features first, then others)
-	const categoryOrder = ["Features", "Release", "AI Features", "Guarded Release", "Migration"];
+	// Define category order (Release Features first, then others)
+	const categoryOrder = ["Release Features", "AI Features", "Guarded Release", "Migration"];
 	const sortedCategories = Object.keys(flagsByCategory).sort((a, b) => {
 		const aIndex = categoryOrder.indexOf(a);
 		const bIndex = categoryOrder.indexOf(b);

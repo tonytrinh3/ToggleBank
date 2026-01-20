@@ -49,7 +49,7 @@ export const FLAG_METADATA: Record<keyof FeatureFlags, { name: string; descripti
     "release-new-signup-promo": {
         name: "New Signup Promo",
         description: "Show new promotional content on signup page",
-        category: "Release",
+        category: "Release Features",
     },
     "togglebankDBGuardedRelease": {
         name: "DB Guarded Release",
@@ -64,12 +64,12 @@ export const FLAG_METADATA: Record<keyof FeatureFlags, { name: string; descripti
     "wealthManagement": {
         name: "Wealth Management",
         description: "Show wealth management features on dashboard",
-        category: "Features",
+        category: "Release Features",
     },
     "federatedAccounts": {
         name: "Federated Accounts",
         description: "Show federated account access section",
-        category: "Features",
+        category: "Release Features",
     },
     "financialDBMigration": {
         name: "Financial DB Migration",
