@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
  * - Can be reused across components that need delayed navigation
  * 
  * @param shouldRedirect - Boolean condition that triggers the redirect
- * @param redirectPath - Path to redirect to (default: "/bank")
+ * @param redirectPath - Path to redirect to (default: "/")
  * @param delayMs - (Optional) Delay in milliseconds before redirecting (default: 2000)
  * 
  * @example
@@ -18,8 +18,8 @@ import { useRouter } from "next/router";
  * useDelayedRedirect(isLoggedIn, "/dashboard");
  * 
  * @example
- * // Redirect to bank immediately when logged out (pass 0 for no delay)
- * useDelayedRedirect(!isLoggedIn, "/bank", 0);
+ * // Redirect to home immediately when logged out (pass 0 for no delay)
+ * useDelayedRedirect(!isLoggedIn, "/", 0);
  * 
  * @example
  * // Redirect with custom 5 second delay
@@ -27,7 +27,7 @@ import { useRouter } from "next/router";
  */
 export function useDelayedRedirect(
     shouldRedirect: boolean,
-    redirectPath: string = "/bank",
+    redirectPath: string = "/",
     delayMs: number = 750
 ) {
     const router = useRouter();

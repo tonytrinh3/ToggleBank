@@ -30,12 +30,12 @@ import { useDelayedRedirect } from "@/components/hooks/use-delayed-redirect";
  *    → This provides feedback that logout is processing
  * 
  * @param Component - The component to protect
- * @param redirectPath - Path to redirect to when user logs out (default: "/bank")
+ * @param redirectPath - Path to redirect to when user logs out (default: "/")
  * @param loadingMessage - Message to show during logout redirect (default: "Logging out...")
  */
 export function withAuthGuard<P extends object>(
     Component: React.ComponentType<P>,
-    redirectPath: string = "/bank",
+    redirectPath: string = "/",
     loadingMessage: string = "Logging out..."
 ) {
     /**
@@ -153,7 +153,7 @@ export function withAuthGuard<P extends object>(
          * 
          * Parameters:
          * - isLoggingOut: Boolean condition that triggers the redirect
-         * - redirectPath: Where to redirect ("/bank" by default)
+         * - redirectPath: Where to redirect ("/" by default)
          * - (optional) delayMs: Defaults to 2000ms if not provided
          */
         useDelayedRedirect(isLoggingOut, redirectPath);

@@ -6,7 +6,7 @@ export function ForbiddenPage() {
     const router = useRouter();
 
     const handleGoToHome = () => {
-        router.push("/bank");
+        router.push("/");
     };
 
     return (
